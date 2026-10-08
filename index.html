@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мои маленькие истории</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+    
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/screens.css">
+    <link rel="stylesheet" href="css/canvas.css">
+    <link rel="stylesheet" href="css/scene.css">
+    <link rel="stylesheet" href="css/telegram.css">
+    <link rel="stylesheet" href="css/minigame.css">
+</head>
+<body>
+    <div id="app">
+
+        <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
+        <section id="screen-menu" class="screen active">
+            <header class="header">
+                <h1>📖 Мои маленькие истории</h1>
+                <p class="subtitle">Рисуй. Играй. Создавай миры.</p>
+            </header>
+            
+            <nav class="menu-grid">
+                <button class="menu-card" data-action="avatar">
+                    <span class="icon">👦</span>
+                    <span class="title">Мой персонаж</span>
+                    <span class="desc">Создай или измени аватара</span>
+                </button>
+                
+                <button class="menu-card" data-action="stories">
+                    <span class="icon">📚</span>
+                    <span class="title">Сказки</span>
+                    <span class="desc">Открытые и закрытые истории</span>
+                </button>
+                
+                <button class="menu-card" data-action="inventory">
+                    <span class="icon">🎒</span>
+                    <span class="title">Инвентарь</span>
+                    <span class="desc">Что ты собрал в приключениях</span>
+                </button>
+                
+                <button class="menu-card" data-action="portfolio">
+                    <span class="icon">🎨</span>
+                    <span class="title">Мои рисунки</span>
+                    <span class="desc">Портфолио твоих работ</span>
+                </button>
+            </nav>
+        </section>
+
+        <!-- ЭКРАН 2: СОЗДАНИЕ АВАТАРА -->
+        <section id="screen-avatar" class="screen">
+            <header class="top-bar">
+                <button class="back-btn" data-back>←</button>
+                <h2 id="avatar-title">Мой персонаж</h2>
+            </header>
+            
+            <div class="avatar-body">
+                <p class="avatar-hint">Нарисуй себя! Мальчик или девочка — как хочешь.</p>
+                <div class="canvas-container">
+                    <canvas id="avatar-canvas" width="600" height="600"></canvas>
+                </div>
+                <div class="tools-panel">
+                    <div class="colors">
+                        <button class="color" data-color="#1a1a1a" style="background:#1a1a1a"></button>
+                        <button class="color" data-color="#e63946" style="background:#e63946"></button>
+                        <button class="color" data-color="#f4a261" style="background:#f4a261"></button>
+                        <button class="color" data-color="#2a9d8f" style="background:#2a9d8f"></button>
+                        <button class="color" data-color="#457b9d" style="background:#457b9d"></button>
+                        <button class="color" data-color="#9d4edd" style="background:#9d4edd"></button>
+                        <button class="color" data-color="#ffd60a" style="background:#ffd60a"></button>
+                        <button class="color" data-color="#ffffff" style="background:#ffffff;border:1px solid #ccc"></button>
+                    </div>
+                    <div class="tool-buttons">
+                        <button class="tool active" data-tool="brush">🖌️ Кисть</button>
+                        <button class="tool" data-tool="eraser">🧽 Ластик</button>
+                        <button class="tool" data-tool="clear">🗑️ Очистить</button>
+                    </div>
+                    <div class="size-slider">
+                        <label>Толщина: <input type="range" id="brush-size" min="2" max="40" value="8"></label>
+                    </div>
+                </div>
+                <button class="save-btn" id="save-avatar">✅ Сохранить персонажа</button>
+            </div>
+        </section>
+
+        <!-- ЭКРАН 3: СПИСОК СКАЗОК -->
+        <section id="screen-stories" class="screen">
+            <header class="top-bar">
+                <button class="back-btn" data-back>←</button>
+                <h2>Сказки</h2>
+            </header>
+            <div id="stories-grid" class="stories-grid"></div>
+        </section>
+
+        <!-- ЭКРАН 4: ПРОСМОТР СКАЗКИ (игра) -->
+        <section id="screen-story" class="screen">
+            <header class="top-bar">
+                <button class="back-btn" data-back>←</button>
+                <h2 id="story-title">Сказка</h2>
+                <span id="story-progress" class="progress-badge">1/5</span>
+            </header>
+            
+            <div class="story-scene" id="story-scene">
+                <div class="scene-background" id="scene-bg"></div>
+                <div class="scene-actors" id="scene-actors"></div>
+            </div>
+            
+            <div class="story-body">
+                <p class="story-text" id="story-text"></p>
+                <div class="story-task" id="story-task"></div>
+                <div class="story-choices" id="story-choices"></div>
+            </div>
+        </section>
+
+        <!-- ЭКРАН 5: РИСОВАНИЕ ПРЕДМЕТА -->
+        <section id="screen-draw" class="screen">
+            <header class="top-bar">
+                <button class="back-btn" data-back>←</button>
+                <h2 id="draw-title">Рисуем</h2>
+            </header>
+            
+            <div class="draw-body">
+                <p class="draw-hint" id="draw-hint"></p>
+                <div class="canvas-container">
+                    <canvas id="draw-canvas" width="600" height="600"></canvas>
+                </div>
+                <div class="tools-panel">
+                    <div class="colors">
+                        <button class="color" data-color="#1a1a1a" style="background:#1a1a1a"></button>
+                        <button class="color" data-color="#e63946" style="background:#e63946"></button>
+                        <button class="color" data-color="#f4a261" style="background:#f4a261"></button>
+                        <button class="color" data-color="#2a9d8f" style="background:#2a9d8f"></button>
+                        <button class="color" data-color="#457b9d" style="background:#457b9d"></button>
+                        <button class="color" data-color="#9d4edd" style="background:#9d4edd"></button>
+                        <button class="color" data-color="#ffd60a" style="background:#ffd60a"></button>
+                        <button class="color" data-color="#ffffff" style="background:#ffffff;border:1px solid #ccc"></button>
+                    </div>
+                    <div class="tool-buttons">
+                        <button class="tool active" data-tool="brush">🖌️ Кисть</button>
+                        <button class="tool" data-tool="eraser">🧽 Ластик</button>
+                        <button class="tool" data-tool="clear">🗑️ Очистить</button>
+                    </div>
+                    <div class="size-slider">
+                        <label>Толщина: <input type="range" id="draw-brush-size" min="2" max="40" value="8"></label>
+                    </div>
+                </div>
+                <button class="save-btn" id="save-drawing">✅ Готово! В сказку</button>
+            </div>
+        </section>
+
+        <!-- ЭКРАН 6: ИНВЕНТАРЬ -->
+        <section id="screen-inventory" class="screen">
+            <header class="top-bar">
+                <button class="back-btn" data-back>←</button>
+                <h2>Инвентарь</h2>
+            </header>
+            <div id="inventory-grid" class="inventory-grid"></div>
+        </section>
+
+        <!-- ЭКРАН 7: ПОРТФОЛИО -->
+        <section id="screen-portfolio" class="screen">
+            <header class="top-bar">
+                <button class="back-btn" data-back>←</button>
+                <h2>Мои рисунки</h2>
+            </header>
+            <div id="portfolio-grid" class="portfolio-grid"></div>
+        </section>
+
+        <!-- ЭКРАН 8: МИНИ-ИГРА -->
+        <section id="screen-minigame" class="screen">
+            <header class="top-bar">
+                <h2 id="minigame-title">🎮 Играем!</h2>
+                <span id="minigame-progress" class="progress-badge">⭐ 0/5</span>
+            </header>
+            <div class="minigame-body">
+                <p class="minigame-hint" id="minigame-hint">Тапай на экран, чтобы подпрыгнуть!</p>
+                <div id="minigame-container"></div>
+            </div>
+        </section>
+
+        <!-- МОДАЛКА -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <h3 id="modal-title"></h3>
+                <p id="modal-text"></p>
+                <button id="modal-close">Понятно</button>
+            </div>
+        </div>
+
+        <!-- ТОСТ -->
+        <div id="toast" class="toast"></div>
+
+    </div>
+
+    <!-- Данные -->
+    <script src="data/stories/prince_and_dragon.js"></script>
+    <script src="data/player/items.js"></script>
+
+    <!-- Ядро -->
+    <script src="js/core/state.js"></script>
+    <script src="js/core/storage.js"></script>
+    <script src="js/core/router.js"></script>
+    <script src="js/core/telegram.js"></script>
+    <script src="js/core/audio.js"></script>
+
+    <!-- Игрок -->
+    <script src="js/player/avatar.js"></script>
+    <script src="js/player/inventory.js"></script>
+    <script src="js/player/progression.js"></script>
+
+    <!-- Рисование -->
+    <script src="js/drawing/canvas.js"></script>
+    <script src="js/drawing/tools.js"></script>
+    <script src="js/drawing/export.js"></script>
+    <script src="js/drawing/draw.js"></script>
+
+    <!-- Сказки -->
+    <script src="js/story/engine.js"></script>
+    <script src="js/story/branches.js"></script>
+    <script src="js/story/scenes.js"></script>
+
+    <!-- Сцена -->
+    <script src="js/scene/stage.js"></script>
+    <script src="js/scene/actors.js"></script>
+    <script src="js/scene/animations.js"></script>
+
+    <!-- Мини-игры -->
+    <script src="js/minigames/engine.js"></script>
+    <script src="js/minigames/gravity.js"></script>
+    <script src="js/minigames/angry_birds.js"></script>
+    <script src="js/minigames/fighting.js"></script>
+    <script src="js/minigames/physics.js"></script>
+    <script src="js/minigames/puzzle.js"></script>
+    <script src="js/minigames/platformer.js"></script>
+    <script src="js/minigames/racing.js"></script>
+
+    <!-- UI -->
+    <script src="js/ui/modal.js"></script>
+    <script src="js/ui/toast.js"></script>
+    <script src="js/ui/buttons.js"></script>
+
+    <!-- Точка входа -->
+    <script src="js/main.js"></script>
+</body>
+</html>

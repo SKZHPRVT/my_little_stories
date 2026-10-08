@@ -1,0 +1,23 @@
+/* ===== TELEGRAM MINI APP ===== */
+
+/* Сдвиг под верхнюю панель Telegram */
+body.telegram-env .header {
+    padding-top: 72px;
+}
+
+body.telegram-env .top-bar {
+    padding-top: 16px;
+}
+
+/* Убеждаемся что ничего не перекрывается */
+.menu-card, .gallery-item, .story-card, .tool, .color, 
+.choice-btn, .save-btn, .back-btn {
+    position: relative;
+    z-index: 5;
+    touch-action: manipulation;
+}
+
+/* Дополнительная высота для мобильных */
+body.telegram-env {
+    min-height: var(--tg-viewport-height, 100vh);
+}
