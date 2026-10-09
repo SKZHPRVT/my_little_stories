@@ -3,18 +3,19 @@
    ============================================ */
 
 window.Storage = {
-    KEY: 'my_little_stories_v1',
+    KEY: 'my_little_stories_v2',
 
     save() {
         try {
             const data = {
                 player: window.State.player,
                 story: window.State.story,
-                progress: window.State.progress
+                progress: window.State.progress,
+                settings: window.State.settings
             };
             localStorage.setItem(this.KEY, JSON.stringify(data));
         } catch (e) {
-            console.warn('⚠️ Не удалось сохранить:', e);
+            console.warn('⚠️ Не сохранить:', e);
         }
     },
 
@@ -26,9 +27,10 @@ window.Storage = {
             if (data.player) window.State.player = { ...window.State.player, ...data.player };
             if (data.story) window.State.story = { ...window.State.story, ...data.story };
             if (data.progress) window.State.progress = data.progress;
+            if (data.settings) window.State.settings = data.settings;
             console.log('💾 Состояние загружено');
         } catch (e) {
-            console.warn('⚠️ Не удалось загрузить:', e);
+            console.warn('⚠️ Не загрузить:', e);
         }
     },
 
@@ -37,14 +39,12 @@ window.Storage = {
         location.reload();
     },
 
-    // Отдельные сохранялки
     saveAvatar(base64) {
         window.State.player.avatar = base64;
         this.save();
     },
 
     saveDrawing(key, base64) {
-        // Сохраняем рисунок в portfolio
         if (!window.State.player.portfolio) window.State.player.portfolio = {};
         window.State.player.portfolio[key] = base64;
         this.save();

@@ -1,17 +1,14 @@
-/* ===== ПЕРЕМЕННЫЕ ТЕМЫ ===== */
+/* ===== ПЕРЕМЕННЫЕ ===== */
 :root {
     --bg: var(--tg-theme-bg-color, #faf7f2);
     --text: var(--tg-theme-text-color, #2b2b2b);
     --hint: var(--tg-theme-hint-color, #8b8b8b);
-    --btn: var(--tg-theme-button-color, #c96d3a);
-    --btn-text: var(--tg-theme-button-text-color, #ffffff);
-    --secondary-bg: var(--tg-theme-secondary-bg-color, #f0ebe3);
     --accent: #c96d3a;
+    --secondary-bg: var(--tg-theme-secondary-bg-color, #f0ebe3);
     --paper: #faf7f2;
     --ink: #2b2b2b;
     --shadow: rgba(0, 0, 0, 0.08);
 
-    /* Цвета веток */
     --branch-yellow: #f4a261;
     --branch-blue: #457b9d;
     --branch-red: #e63946;
@@ -26,9 +23,7 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
-    height: 100%;
-}
+html, body { height: 100%; }
 
 body {
     font-family: 'Georgia', 'Times New Roman', serif;
@@ -44,13 +39,6 @@ body {
     position: relative;
 }
 
-/* ===== УТИЛИТЫ ===== */
-.hidden { display: none !important; }
-.text-center { text-align: center; }
-.mt-1 { margin-top: 8px; }
-.mt-2 { margin-top: 16px; }
-.mt-3 { margin-top: 24px; }
-
 /* ===== КНОПКИ ===== */
 button {
     font-family: inherit;
@@ -61,13 +49,22 @@ button {
     touch-action: manipulation;
 }
 
-button:active {
-    transform: scale(0.96);
-}
+button:active { transform: scale(0.96); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+.btn-primary {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: 16px auto;
+    padding: 18px 24px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(201, 109, 58, 0.3);
+    font-family: inherit;
 }
 
 /* ===== АНИМАЦИИ ===== */
@@ -78,14 +75,68 @@ button:disabled {
 
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    50% { transform: scale(1.08); }
 }
 
-@keyframes glow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(201, 109, 58, 0.4); }
-    50% { box-shadow: 0 0 20px 8px rgba(201, 109, 58, 0.2); }
+.fade-in { animation: fadeIn 0.4s ease; }
+
+/* ===== МОДАЛКА ===== */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
-.fade-in {
-    animation: fadeIn 0.4s ease;
+.modal.active { display: flex; }
+
+.modal-content {
+    background: var(--bg);
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.modal-content h3 { margin-bottom: 12px; font-size: 18px; }
+.modal-content p { color: var(--hint); line-height: 1.5; margin-bottom: 20px; font-size: 14px; white-space: pre-line; }
+
+.modal-content button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+}
+
+/* ===== TOAST ===== */
+.toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 200;
+    pointer-events: none;
+    max-width: 90vw;
+    text-align: center;
+}
+
+.toast.active {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }

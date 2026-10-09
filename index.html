@@ -11,58 +11,148 @@
     <link rel="stylesheet" href="css/screens.css">
     <link rel="stylesheet" href="css/canvas.css">
     <link rel="stylesheet" href="css/scene.css">
-    <link rel="stylesheet" href="css/telegram.css">
     <link rel="stylesheet" href="css/minigame.css">
+    <link rel="stylesheet" href="css/telegram.css">
 </head>
 <body>
     <div id="app">
 
-        <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
-        <section id="screen-menu" class="screen active">
-            <header class="header">
-                <h1>📖 Мои маленькие истории</h1>
-                <p class="subtitle">Рисуй. Играй. Создавай миры.</p>
-            </header>
+        <!-- ============ ЭКРАН 0: ОНБОРДИНГ ============ -->
+        <section id="screen-onboarding" class="screen">
+            <div class="onboarding-body">
+                <!-- Шаг 1: Приветствие -->
+                <div class="onboarding-step active" data-step="1">
+                    <div class="onboarding-icon">🎨</div>
+                    <h1>Привет!</h1>
+                    <p class="onboarding-text">
+                        Рад тебя видеть!<br><br>
+                        Здесь ты будешь <b>рисовать</b> своего героя,<br>
+                        <b>создавать</b> предметы<br>
+                        и <b>играть</b> в удивительные сказки.
+                    </p>
+                    <p class="onboarding-text">
+                        Твои рисунки оживут —<br>
+                        в этом и вся магия ✨
+                    </p>
+                    <button class="btn-primary" id="onboarding-next-1">Давай начнём →</button>
+                </div>
+
+                <!-- Шаг 2: Рисование -->
+                <div class="onboarding-step" data-step="2">
+                    <h2 class="onboarding-title">Нарисуй себя</h2>
+                    <p class="onboarding-hint">Мальчик или девочка — как хочешь</p>
+                    
+                    <div class="canvas-container">
+                        <canvas id="onboarding-canvas" width="600" height="600"></canvas>
+                    </div>
+                    
+                    <div class="tools-panel">
+                        <div class="colors">
+                            <button class="color" data-color="#1a1a1a" style="background:#1a1a1a"></button>
+                            <button class="color" data-color="#e63946" style="background:#e63946"></button>
+                            <button class="color" data-color="#f4a261" style="background:#f4a261"></button>
+                            <button class="color" data-color="#2a9d8f" style="background:#2a9d8f"></button>
+                            <button class="color" data-color="#457b9d" style="background:#457b9d"></button>
+                            <button class="color" data-color="#9d4edd" style="background:#9d4edd"></button>
+                            <button class="color" data-color="#ffd60a" style="background:#ffd60a"></button>
+                            <button class="color" data-color="#ffffff" style="background:#ffffff;border:1px solid #ccc"></button>
+                        </div>
+                        <div class="tool-buttons">
+                            <button class="tool active" data-tool="brush">🖌️ Кисть</button>
+                            <button class="tool" data-tool="eraser">🧽 Ластик</button>
+                            <button class="tool" data-tool="clear">🗑️ Очистить</button>
+                        </div>
+                        <div class="size-slider">
+                            <label>Толщина: <input type="range" id="onboarding-brush-size" min="2" max="40" value="8"></label>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-primary" id="onboarding-next-2">Готово →</button>
+                </div>
+
+                <!-- Шаг 3: Имя -->
+                <div class="onboarding-step" data-step="3">
+                    <h2 class="onboarding-title">Как тебя зовут?</h2>
+                    <p class="onboarding-hint">Твоё имя будет в сказках</p>
+                    
+                    <div class="name-input-wrap">
+                        <input 
+                            type="text" 
+                            id="onboarding-name" 
+                            class="name-input" 
+                            placeholder="Введи имя..." 
+                            maxlength="20"
+                            autocomplete="off"
+                        >
+                    </div>
+                    
+                    <button class="btn-primary" id="onboarding-finish">Начать приключение 🚀</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ ЭКРАН 1: ГЛАВНОЕ МЕНЮ ============ -->
+        <section id="screen-menu" class="screen">
+            <div class="menu-main">
+                <!-- Аватар по центру -->
+                <div class="hero-display" id="hero-display">
+                    <img id="hero-avatar" class="hero-avatar" src="" alt="Твой герой">
+                </div>
+                
+                <!-- Имя по центру -->
+                <h1 class="hero-name" id="hero-name">Герой</h1>
+                
+                <!-- Большая кнопка Истории -->
+                <button class="btn-stories" id="btn-stories">
+                    <span class="btn-stories-icon">📚</span>
+                    <span class="btn-stories-text">Истории</span>
+                </button>
+            </div>
             
-            <nav class="menu-grid">
-                <button class="menu-card" data-action="avatar">
-                    <span class="icon">👦</span>
-                    <span class="title">Мой персонаж</span>
-                    <span class="desc">Создай или измени аватара</span>
+            <!-- Нижняя навигация -->
+            <nav class="bottom-nav">
+                <button class="nav-btn" data-nav="character">
+                    <span class="nav-icon">👦</span>
+                    <span class="nav-label">Герой</span>
                 </button>
-                
-                <button class="menu-card" data-action="stories">
-                    <span class="icon">📚</span>
-                    <span class="title">Сказки</span>
-                    <span class="desc">Открытые и закрытые истории</span>
+                <button class="nav-btn" data-nav="inventory">
+                    <span class="nav-icon">🎒</span>
+                    <span class="nav-label">Вещи</span>
                 </button>
-                
-                <button class="menu-card" data-action="inventory">
-                    <span class="icon">🎒</span>
-                    <span class="title">Инвентарь</span>
-                    <span class="desc">Что ты собрал в приключениях</span>
+                <button class="nav-btn" data-nav="activities">
+                    <span class="nav-icon">🎮</span>
+                    <span class="nav-label">Игры</span>
                 </button>
-                
-                <button class="menu-card" data-action="portfolio">
-                    <span class="icon">🎨</span>
-                    <span class="title">Мои рисунки</span>
-                    <span class="desc">Портфолио твоих работ</span>
+                <button class="nav-btn" data-nav="progress">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Успехи</span>
+                </button>
+                <button class="nav-btn" data-nav="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">Настройки</span>
                 </button>
             </nav>
         </section>
 
-        <!-- ЭКРАН 2: СОЗДАНИЕ АВАТАРА -->
-        <section id="screen-avatar" class="screen">
+        <!-- ============ ЭКРАН 2: ПЕРСОНАЖ (перерисовать / имя) ============ -->
+        <section id="screen-character" class="screen">
             <header class="top-bar">
                 <button class="back-btn" data-back>←</button>
-                <h2 id="avatar-title">Мой персонаж</h2>
+                <h2>Мой герой</h2>
             </header>
             
-            <div class="avatar-body">
-                <p class="avatar-hint">Нарисуй себя! Мальчик или девочка — как хочешь.</p>
-                <div class="canvas-container">
-                    <canvas id="avatar-canvas" width="600" height="600"></canvas>
+            <div class="character-body">
+                <div class="character-name-row">
+                    <label>Имя:</label>
+                    <input type="text" id="character-name" class="name-input-small" maxlength="20">
                 </div>
+                
+                <p class="character-hint">Перерисуй, если хочешь</p>
+                
+                <div class="canvas-container">
+                    <canvas id="character-canvas" width="600" height="600"></canvas>
+                </div>
+                
                 <div class="tools-panel">
                     <div class="colors">
                         <button class="color" data-color="#1a1a1a" style="background:#1a1a1a"></button>
@@ -80,23 +170,24 @@
                         <button class="tool" data-tool="clear">🗑️ Очистить</button>
                     </div>
                     <div class="size-slider">
-                        <label>Толщина: <input type="range" id="brush-size" min="2" max="40" value="8"></label>
+                        <label>Толщина: <input type="range" id="character-brush-size" min="2" max="40" value="8"></label>
                     </div>
                 </div>
-                <button class="save-btn" id="save-avatar">✅ Сохранить персонажа</button>
+                
+                <button class="btn-primary" id="character-save">💾 Сохранить</button>
             </div>
         </section>
 
-        <!-- ЭКРАН 3: СПИСОК СКАЗОК -->
+        <!-- ============ ЭКРАН 3: СПИСОК СКАЗОК ============ -->
         <section id="screen-stories" class="screen">
             <header class="top-bar">
                 <button class="back-btn" data-back>←</button>
-                <h2>Сказки</h2>
+                <h2>Истории</h2>
             </header>
             <div id="stories-grid" class="stories-grid"></div>
         </section>
 
-        <!-- ЭКРАН 4: ПРОСМОТР СКАЗКИ (игра) -->
+        <!-- ============ ЭКРАН 4: СКАЗКА (игра) ============ -->
         <section id="screen-story" class="screen">
             <header class="top-bar">
                 <button class="back-btn" data-back>←</button>
@@ -116,7 +207,7 @@
             </div>
         </section>
 
-        <!-- ЭКРАН 5: РИСОВАНИЕ ПРЕДМЕТА -->
+        <!-- ============ ЭКРАН 5: РИСОВАНИЕ ПРЕДМЕТА ============ -->
         <section id="screen-draw" class="screen">
             <header class="top-bar">
                 <button class="back-btn" data-back>←</button>
@@ -148,29 +239,74 @@
                         <label>Толщина: <input type="range" id="draw-brush-size" min="2" max="40" value="8"></label>
                     </div>
                 </div>
-                <button class="save-btn" id="save-drawing">✅ Готово! В сказку</button>
+                <button class="btn-primary" id="save-drawing">✅ Готово!</button>
             </div>
         </section>
 
-        <!-- ЭКРАН 6: ИНВЕНТАРЬ -->
+        <!-- ============ ЭКРАН 6: ИНВЕНТАРЬ ============ -->
         <section id="screen-inventory" class="screen">
             <header class="top-bar">
                 <button class="back-btn" data-back>←</button>
-                <h2>Инвентарь</h2>
+                <h2>Мои вещи</h2>
             </header>
             <div id="inventory-grid" class="inventory-grid"></div>
         </section>
 
-        <!-- ЭКРАН 7: ПОРТФОЛИО -->
-        <section id="screen-portfolio" class="screen">
+        <!-- ============ ЭКРАН 7: АКТИВНОСТИ (мини-игры) ============ -->
+        <section id="screen-activities" class="screen">
             <header class="top-bar">
                 <button class="back-btn" data-back>←</button>
-                <h2>Мои рисунки</h2>
+                <h2>Мои игры</h2>
             </header>
-            <div id="portfolio-grid" class="portfolio-grid"></div>
+            <div id="activities-grid" class="activities-grid"></div>
         </section>
 
-        <!-- ЭКРАН 8: МИНИ-ИГРА -->
+        <!-- ============ ЭКРАН 8: ПРОГРЕСС ============ -->
+        <section id="screen-progress" class="screen">
+            <header class="top-bar">
+                <button class="back-btn" data-back>←</button>
+                <h2>Мои успехи</h2>
+            </header>
+            <div id="progress-body" class="progress-body"></div>
+        </section>
+
+        <!-- ============ ЭКРАН 9: НАСТРОЙКИ ============ -->
+        <section id="screen-settings" class="screen">
+            <header class="top-bar">
+                <button class="back-btn" data-back>←</button>
+                <h2>Настройки</h2>
+            </header>
+            <div class="settings-body">
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span>🔊 Звук</span>
+                        <input type="checkbox" id="setting-sound" checked>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span>📳 Вибрация</span>
+                        <input type="checkbox" id="setting-vibration" checked>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <button class="setting-btn" id="setting-reset">🔄 Сбросить прогресс</button>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-label" style="flex-direction:column;align-items:flex-start;gap:8px;">
+                        <span>💻 Чит-коды</span>
+                        <input type="text" id="setting-cheat" class="name-input-small" placeholder="sv_cheats 1" style="width:100%;">
+                    </label>
+                    <p class="setting-hint">Введи команду для разблокировки всего</p>
+                </div>
+                <div class="setting-item setting-about">
+                    <p><b>Мои маленькие истории</b></p>
+                    <p style="font-size:12px;opacity:0.7;">v0.1 — Little Big Planet в мире Paint</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ ЭКРАН 10: МИНИ-ИГРА ============ -->
         <section id="screen-minigame" class="screen">
             <header class="top-bar">
                 <h2 id="minigame-title">🎮 Играем!</h2>
@@ -242,6 +378,8 @@
     <script src="js/ui/modal.js"></script>
     <script src="js/ui/toast.js"></script>
     <script src="js/ui/buttons.js"></script>
+    <script src="js/ui/onboarding.js"></script>
+    <script src="js/ui/bottom-nav.js"></script>
 
     <!-- Точка входа -->
     <script src="js/main.js"></script>

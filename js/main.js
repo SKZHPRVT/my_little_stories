@@ -1,50 +1,68 @@
 /* ============================================
-   ТОЧКА ВХОДА
+   ГЛАВНАЯ ТОЧКА ВХОДА
    ============================================ */
+
+window.Menu = {
+    // Обновить главный экран
+    refresh() {
+        const avatar = window.State.player.avatar;
+        const name = window.State.player.name;
+
+        const heroImg = document.getElementById('hero-avatar');
+        const heroName = document.getElementById('hero-name');
+
+        if (heroImg && avatar) heroImg.src = avatar;
+        if (heroName) heroName.textContent = name || 'Герой';
+
+        // Анимация при тапе
+        const heroDisplay = document.getElementById('hero-display');
+        if (heroDisplay && !heroDisplay.dataset.bound) {
+            heroDisplay.dataset.bound = 'true';
+            window.Buttons.onTap(heroDisplay, () => {
+                const animations = ['bounce', 'spin', 'jump'];
+                const anim = animations[Math.floor(Math.random() * animations.length)];
+                heroDisplay.classList.add(anim);
+                window.Audio.beep(800, 0.1);
+                window.TG.haptic('light');
+                setTimeout(() => heroDisplay.classList.remove(anim), 800);
+            });
+        }
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🎬 Запускаем Мои маленькие истории...');
 
-    // 1. Инициализируем Telegram
+    // Инициализация
     window.TG.init();
-
-    // 2. Загружаем сохранённое состояние
     window.Storage.load();
-
-    // 3. Инициализируем роутер
     window.Router.init();
-
-    // 4. Инициализируем звук
     window.Audio.init();
-
-    // 5. Инициализируем UI (модалки, тосты, кнопки)
     window.Modal.init();
     window.Toast.init();
     window.Buttons.init();
+    window.BottomNav.init();
 
-    // 6. Привязываем кнопки главного меню
-    document.querySelectorAll('.menu-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const action = card.dataset.action;
-            window.Audio.click();
-            window.TG.haptic('light');
+    // Загружаем настройки в State
+    if (!window.State.settings) {
+        window.State.settings = { sound: true, vibration: true };
+    }
 
-            switch (action) {
-                case 'avatar':
-                    window.Avatar.open();
-                    break;
-                case 'stories':
-                    window.StoryEngine.openList();
-                    break;
-                case 'inventory':
-                    window.Inventory.open();
-                    break;
-                case 'portfolio':
-                    window.Portfolio.open();
-                    break;
-            }
-        });
+    // Кнопка «Истории»
+    window.Buttons.onTap(document.getElementById('btn-stories'), () => {
+        window.Audio.click();
+        window.StoryEngine.openList();
     });
 
-    console.log('✅ Приложение готово!');
+    // Логика запуска
+    if (window.Onboarding.needs()) {
+        // Первый запуск — онбординг
+        window.Onboarding.start();
+    } else {
+        // Уже есть персонаж — в меню
+        window.Menu.refresh();
+        window.Router.go('menu');
+    }
+
+    console.log('✅ Готово!');
 });
