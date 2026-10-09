@@ -1,0 +1,280 @@
+/* ============================================
+   СТИЛИ ОНБОРДИНГА
+   ============================================ */
+
+.onboarding-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 20px;
+    overflow-y: auto;
+    min-height: 100%;
+    justify-content: center;
+}
+
+.onboarding-step {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeIn 0.4s ease;
+}
+
+/* ===== Приветствие ===== */
+.onboarding-icon {
+    font-size: 80px;
+    text-align: center;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.onboarding-body h1 {
+    font-size: 36px;
+    text-align: center;
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.onboarding-text {
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+/* ===== Шаг рисования части ===== */
+.onboarding-part-step {
+    gap: 12px;
+}
+
+.onboarding-part-header {
+    text-align: center;
+    padding: 8px 0;
+}
+
+.onboarding-part-progress {
+    display: inline-block;
+    padding: 4px 14px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.onboarding-part-title {
+    font-size: 24px;
+    color: var(--ink);
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.onboarding-part-hint {
+    font-size: 14px;
+    color: var(--hint);
+    font-style: italic;
+}
+
+/* ===== Холст со слоями (SVG + canvas) ===== */
+.canvas-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+}
+
+.canvas-layers {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 1 / 1;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px var(--shadow);
+    overflow: hidden;
+}
+
+.canvas-layers canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    touch-action: none;
+    border-radius: 16px;
+}
+
+.canvas-guide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ===== Финальный превью ===== */
+.onboarding-preview {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0;
+}
+
+.final-preview {
+    width: 240px;
+    height: 240px;
+    background: var(--paper);
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    box-shadow: 0 4px 16px var(--shadow);
+    overflow: hidden;
+    position: relative;
+}
+
+.final-preview .avatar-part {
+    width: 600px !important;
+    height: 600px !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform-origin: top left !important;
+}
+
+/* ===== Экран персонажа ===== */
+.character-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 14px;
+    overflow-y: auto;
+}
+
+.character-name-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.character-name-row label {
+    font-size: 14px;
+    color: var(--hint);
+}
+
+.character-name-row input {
+    flex: 1;
+}
+
+.mini-btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    font-family: inherit;
+}
+
+.character-preview {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.preview-stack {
+    background: var(--paper);
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    overflow: hidden;
+    position: relative;
+    width: 300px;
+    height: 300px;
+}
+
+.preview-stack .avatar-part {
+    width: 600px !important;
+    height: 600px !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform-origin: top left !important;
+}
+
+.character-hint {
+    text-align: center;
+    font-size: 13px;
+    color: var(--hint);
+    font-style: italic;
+}
+
+.parts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.part-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--paper);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    box-shadow: 0 2px 6px var(--shadow);
+    border: 2px solid transparent;
+}
+
+.part-card.has {
+    border-color: var(--accent);
+}
+
+.part-card-title {
+    font-weight: 600;
+}
+
+/* ===== Главный экран: аватар-стопка ===== */
+.hero-avatar-stack {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.hero-avatar-stack .avatar-part {
+    width: 600px !important;
+    height: 600px !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform-origin: top left !important;
+    transform: scale(0.333) !important; /* 200 / 600 = 0.333 */
+}
+
+/* ===== Анимации ===== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+/* ===== Адаптив ===== */
+@media (max-width: 400px) {
+    .onboarding-body { padding: 20px 14px; }
+    .onboarding-part-title { font-size: 20px; }
+    .onboarding-icon { font-size: 60px; }
+    .onboarding-body h1 { font-size: 28px; }
+    .hero-avatar-stack .avatar-part { transform: scale(0.3) !important; }
+    .final-preview { width: 180px; height: 180px; }
+    .final-preview .avatar-part { transform: scale(0.3) !important; }
+    .preview-stack { width: 240px; height: 240px; }
+    .preview-stack .avatar-part { transform: scale(0.4) !important; }
+}

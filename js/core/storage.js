@@ -3,7 +3,7 @@
    ============================================ */
 
 window.Storage = {
-    KEY: 'my_little_stories_v2',
+    KEY: 'my_little_stories_v3',
 
     save() {
         try {

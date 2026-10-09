@@ -3,66 +3,78 @@
    ============================================ */
 
 window.Menu = {
-    // Обновить главный экран
     refresh() {
-        const avatar = window.State.player.avatar;
         const name = window.State.player.name;
 
-        const heroImg = document.getElementById('hero-avatar');
+        // Имя
         const heroName = document.getElementById('hero-name');
-
-        if (heroImg && avatar) heroImg.src = avatar;
         if (heroName) heroName.textContent = name || 'Герой';
+
+        // Стопка персонажа
+        const stack = document.getElementById('hero-avatar-stack');
+        if (stack) {
+            window.Avatar.renderStack(stack, { scale: 0.333 });
+            // Применяем масштаб через CSS класс
+            stack.querySelectorAll('.avatar-part').forEach(img => {
+                img.style.width = '600px';
+                img.style.height = '600px';
+                img.style.transform = 'scale(0.333)';
+                img.style.transformOrigin = 'top left';
+            });
+        }
 
         // Анимация при тапе
         const heroDisplay = document.getElementById('hero-display');
         if (heroDisplay && !heroDisplay.dataset.bound) {
             heroDisplay.dataset.bound = 'true';
             window.Buttons.onTap(heroDisplay, () => {
-                const animations = ['bounce', 'spin', 'jump'];
-                const anim = animations[Math.floor(Math.random() * animations.length)];
-                heroDisplay.classList.add(anim);
+                window.Avatar.animateRandom(heroDisplay);
                 window.Audio.beep(800, 0.1);
                 window.TG.haptic('light');
-                setTimeout(() => heroDisplay.classList.remove(anim), 800);
             });
         }
     }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎬 Запускаем Мои маленькие истории...');
+    console.log('🎬 Запуск Мои маленькие истории');
 
-    // Инициализация
-    window.TG.init();
-    window.Storage.load();
-    window.Router.init();
-    window.Audio.init();
-    window.Modal.init();
-    window.Toast.init();
-    window.Buttons.init();
-    window.BottomNav.init();
+    const init = (name, fn) => {
+        try { fn(); console.log(`✅ ${name}`); }
+        catch (e) { console.error(`❌ ${name}:`, e); }
+    };
 
-    // Загружаем настройки в State
+    init('TG', () => window.TG.init());
+    init('Storage', () => window.Storage.load());
+    init('Router', () => window.Router.init());
+    init('Audio', () => window.Audio.init());
+    init('Modal', () => window.Modal.init());
+    init('Toast', () => window.Toast.init());
+    init('Buttons', () => window.Buttons.init());
+    init('BottomNav', () => window.BottomNav.init());
+
     if (!window.State.settings) {
         window.State.settings = { sound: true, vibration: true };
     }
 
-    // Кнопка «Истории»
-    window.Buttons.onTap(document.getElementById('btn-stories'), () => {
-        window.Audio.click();
-        window.StoryEngine.openList();
-    });
-
-    // Логика запуска
-    if (window.Onboarding.needs()) {
-        // Первый запуск — онбординг
-        window.Onboarding.start();
-    } else {
-        // Уже есть персонаж — в меню
-        window.Menu.refresh();
-        window.Router.go('menu');
+    // Кнопка Истории
+    const storiesBtn = document.getElementById('btn-stories');
+    if (storiesBtn) {
+        window.Buttons.onTap(storiesBtn, () => {
+            window.Audio.click();
+            window.StoryEngine.openList();
+        });
     }
 
-    console.log('✅ Готово!');
+    // Логика запуска
+    init('Запуск', () => {
+        if (window.Onboarding.needs()) {
+            window.Onboarding.start();
+        } else {
+            window.Menu.refresh();
+            window.Router.go('menu');
+        }
+    });
+
+    console.log('🏁 Готово');
 });
