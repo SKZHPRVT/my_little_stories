@@ -6,7 +6,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 32px 20px;
+    padding: 24px 16px;
     overflow-y: auto;
     min-height: 100%;
     justify-content: center;
@@ -15,7 +15,7 @@
 .onboarding-step {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     animation: fadeIn 0.4s ease;
 }
 
@@ -27,7 +27,7 @@
 }
 
 .onboarding-body h1 {
-    font-size: 36px;
+    font-size: 32px;
     text-align: center;
     color: var(--ink);
     font-weight: 700;
@@ -35,19 +35,15 @@
 
 .onboarding-text {
     text-align: center;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.6;
     color: var(--text);
 }
 
-/* ===== Шаг рисования части ===== */
-.onboarding-part-step {
-    gap: 12px;
-}
-
+/* ===== Заголовок шага ===== */
 .onboarding-part-header {
     text-align: center;
-    padding: 8px 0;
+    padding: 4px 0;
 }
 
 .onboarding-part-progress {
@@ -58,34 +54,33 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .onboarding-part-title {
-    font-size: 24px;
+    font-size: 22px;
     color: var(--ink);
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .onboarding-part-hint {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--hint);
     font-style: italic;
 }
 
-/* ===== Холст со слоями (SVG + canvas) ===== */
+/* ===== Холст со слоями ===== */
 .canvas-container {
     display: flex;
     justify-content: center;
-    align-items: center;
     padding: 8px;
 }
 
 .canvas-layers {
     position: relative;
     width: 100%;
-    max-width: 500px;
+    max-width: 400px;
     aspect-ratio: 1 / 1;
     background: #fff;
     border-radius: 16px;
@@ -93,37 +88,60 @@
     overflow: hidden;
 }
 
+/* Canvas — НИЖНИЙ слой, белый фон */
 .canvas-layers canvas {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2;
+    z-index: 1;
     touch-action: none;
+    background: #fff;
     border-radius: 16px;
 }
 
+/* SVG-подсказки — ВЕРХНИЙ слой, прозрачный */
 .canvas-guide {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    z-index: 3;
     pointer-events: none;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Делаем подсказки видимыми */
+.canvas-guide ellipse,
+.canvas-guide path,
+.canvas-guide line,
+.canvas-guide circle {
+    stroke: #c96d3a;
+    stroke-width: 2;
+    fill: none;
+    opacity: 0.5;
+    stroke-dasharray: 8, 6;
+}
+
+.canvas-guide ellipse[stroke*="999"],
+.canvas-guide path[stroke*="999"] {
+    stroke: #999;
 }
 
 /* ===== Финальный превью ===== */
 .onboarding-preview {
     display: flex;
     justify-content: center;
-    padding: 16px 0;
+    padding: 12px 0;
 }
 
 .final-preview {
-    width: 240px;
-    height: 240px;
+    width: 220px;
+    height: 220px;
     background: var(--paper);
     border-radius: 50%;
     border: 3px solid var(--accent);
@@ -139,6 +157,7 @@
     top: 0 !important;
     left: 0 !important;
     transform-origin: top left !important;
+    transform: scale(0.367) !important;
 }
 
 /* ===== Экран персонажа ===== */
@@ -155,7 +174,6 @@
     display: flex;
     gap: 8px;
     align-items: center;
-    padding: 8px 0;
 }
 
 .character-name-row label {
@@ -168,7 +186,7 @@
 }
 
 .mini-btn {
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 10px;
     background: var(--accent);
     color: #fff;
@@ -188,8 +206,8 @@
     border: 3px solid var(--accent);
     overflow: hidden;
     position: relative;
-    width: 300px;
-    height: 300px;
+    width: 280px;
+    height: 280px;
 }
 
 .preview-stack .avatar-part {
@@ -199,6 +217,7 @@
     top: 0 !important;
     left: 0 !important;
     transform-origin: top left !important;
+    transform: scale(0.467) !important;
 }
 
 .character-hint {
@@ -252,7 +271,7 @@
     top: 0 !important;
     left: 0 !important;
     transform-origin: top left !important;
-    transform: scale(0.333) !important; /* 200 / 600 = 0.333 */
+    transform: scale(0.333) !important;
 }
 
 /* ===== Анимации ===== */
@@ -264,17 +283,4 @@
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.08); }
-}
-
-/* ===== Адаптив ===== */
-@media (max-width: 400px) {
-    .onboarding-body { padding: 20px 14px; }
-    .onboarding-part-title { font-size: 20px; }
-    .onboarding-icon { font-size: 60px; }
-    .onboarding-body h1 { font-size: 28px; }
-    .hero-avatar-stack .avatar-part { transform: scale(0.3) !important; }
-    .final-preview { width: 180px; height: 180px; }
-    .final-preview .avatar-part { transform: scale(0.3) !important; }
-    .preview-stack { width: 240px; height: 240px; }
-    .preview-stack .avatar-part { transform: scale(0.4) !important; }
 }

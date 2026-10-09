@@ -3,63 +3,31 @@
    ============================================ */
 
 window.Onboarding = {
-    currentStep: 0,          // 0 = приветствие, 1..6 = части, 7 = имя
+    currentStep: 0,
     bound: false,
-    canvasInited: false,
+    canvasTool: null,
 
     needs() {
         return !window.Avatar.isComplete() || !window.State.player.name;
     },
 
     start() {
+        console.log('🚀 Onboarding.start()');
         this.currentStep = 0;
-        if (!window.Router.screens.onboarding) {
-            console.warn('⚠️ Экран onboarding не найден');
-            return;
-        }
         window.Router.go('onboarding');
         this.render();
         if (!this.bound) {
             this.bound = true;
-            this.bindEvents();
         }
     },
 
-    bindEvents() {
-        const $ = id => document.getElementById(id);
-
-        // Шаг 0: приветствие → шаг 1
-        window.Buttons.onTap($('onboarding-start'), () => {
-            window.Audio.click();
-            this.currentStep = 1;
-            this.render();
-        });
-
-        // Кнопка «Готово» на шаге рисования
-        window.Buttons.onTap($('onboarding-part-done'), () => {
-            this.finishPart();
-        });
-
-        // Пропустить (для опциональных частей, если будут)
-        window.Buttons.onTap($('onboarding-skip'), () => {
-            this.currentStep++;
-            this.render();
-        });
-
-        // Финал: имя
-        window.Buttons.onTap($('onboarding-finish'), () => {
-            this.finish();
-        });
-
-        $('onboarding-name')?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') this.finish();
-        });
-    },
-
-    // ===== Рендер текущего шага =====
+    // ===== Рендер =====
     render() {
         const body = document.querySelector('.onboarding-body');
-        if (!body) return;
+        if (!body) {
+            console.error('❌ Нет .onboarding-body');
+            return;
+        }
 
         if (this.currentStep === 0) {
             this.renderWelcome(body);
@@ -70,30 +38,41 @@ window.Onboarding = {
         }
     },
 
-    // ===== Шаг 0: приветствие =====
+    // ===== Приветствие =====
     renderWelcome(body) {
         body.innerHTML = `
             <div class="onboarding-step active">
                 <div class="onboarding-icon">🎨</div>
                 <h1>Привет!</h1>
                 <p class="onboarding-text">
-                    Рад тебя видеть!<br><br>
                     Сейчас мы <b>создадим твоего героя</b>.<br>
-                    Будем рисовать по частям: голову, лицо,<br>
-                    туловище, руки и ноги.<br><br>
-                    Всё, что ты нарисуешь — <b>оживёт</b> ✨
+                    Будем рисовать по частям:<br>
+                    голову, лицо, туловище, руки и ноги.
                 </p>
                 <button class="btn-primary" id="onboarding-start">Давай начнём →</button>
             </div>
         `;
+
+        // Привязываем клик
+        const btn = document.getElementById('onboarding-start');
+        if (btn) {
+            btn.onclick = () => {
+                console.log('👆 Клик по «Давай начнём»');
+                window.Audio.click();
+                this.currentStep = 1;
+                this.render();
+            };
+        }
     },
 
-    // ===== Шаги 1-6: рисование частей =====
+    // ===== Шаг рисования части =====
     renderPart(body, partIndex) {
         const partId = window.AVATAR_ORDER[partIndex];
         const part = window.AVATAR_PARTS[partId];
         const total = window.AVATAR_ORDER.length;
         const current = partIndex + 1;
+
+        console.log(`🎨 Рисуем часть ${current}/${total}:`, partId);
 
         body.innerHTML = `
             <div class="onboarding-step active onboarding-part-step">
@@ -112,7 +91,7 @@ window.Onboarding = {
                     </div>
                 </div>
 
-                <div class="tools-panel">
+                <div class="tools-panel" id="onboarding-tools">
                     <div class="colors">
                         <button class="color" data-color="#1a1a1a" style="background:#1a1a1a"></button>
                         <button class="color" data-color="#e63946" style="background:#e63946"></button>
@@ -137,17 +116,170 @@ window.Onboarding = {
             </div>
         `;
 
-        // Инициализируем холст
+        // Даём браузеру отрисовать HTML, потом инициализируем canvas
         setTimeout(() => {
-            window.CanvasTool.init('part-canvas', 'part-brush-size');
-            window.CanvasTool.bindToolsPanel('.onboarding-part-step .tools-panel');
-            // Сброс флага чтобы инициализировать заново для каждой части
-            this.canvasInited = false;
-        }, 50);
+            this.initCanvasForPart(partId);
+        }, 100);
     },
 
-    // ===== Шаг 7: имя =====
+    // ===== Инициализация canvas для текущей части =====
+    initCanvasForPart(partId) {
+        const canvasEl = document.getElementById('part-canvas');
+        if (!canvasEl) {
+            console.error('❌ Нет #part-canvas');
+            return;
+        }
+
+        // Инициализируем CanvasTool на конкретном элементе
+        const ctx = canvasEl.getContext('2d');
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
+
+        // Создаём локальный объект рисования (не глобальный)
+        this.canvasTool = {
+            canvas: canvasEl,
+            ctx: ctx,
+            isDrawing: false,
+            lastX: 0,
+            lastY: 0,
+            color: '#1a1a1a',
+            size: 8,
+            tool: 'brush'
+        };
+
+        const tool = this.canvasTool;
+
+        // Получаем координаты на canvas
+        const getPos = (e) => {
+            const rect = canvasEl.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * (canvasEl.width / rect.width),
+                y: (clientY - rect.top) * (canvasEl.height / rect.height)
+            };
+        };
+
+        const start = (e) => {
+            e.preventDefault();
+            const p = getPos(e);
+            tool.isDrawing = true;
+            tool.lastX = p.x;
+            tool.lastY = p.y;
+        };
+
+        const move = (e) => {
+            if (!tool.isDrawing) return;
+            e.preventDefault();
+            const p = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(tool.lastX, tool.lastY);
+            ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = tool.tool === 'eraser' ? '#ffffff' : tool.color;
+            ctx.lineWidth = tool.tool === 'eraser' ? tool.size * 3 : tool.size;
+            ctx.stroke();
+            tool.lastX = p.x;
+            tool.lastY = p.y;
+        };
+
+        const stop = (e) => {
+            if (e) e.preventDefault();
+            tool.isDrawing = false;
+        };
+
+        // Mouse
+        canvasEl.addEventListener('mousedown', start);
+        canvasEl.addEventListener('mousemove', move);
+        canvasEl.addEventListener('mouseup', stop);
+        canvasEl.addEventListener('mouseleave', stop);
+
+        // Touch
+        canvasEl.addEventListener('touchstart', start, { passive: false });
+        canvasEl.addEventListener('touchmove', move, { passive: false });
+        canvasEl.addEventListener('touchend', stop, { passive: false });
+
+        // Slider толщины
+        const slider = document.getElementById('part-brush-size');
+        if (slider) {
+            slider.oninput = (e) => tool.size = parseInt(e.target.value);
+        }
+
+        // Палитра цветов
+        document.querySelectorAll('#onboarding-tools .color').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('#onboarding-tools .color').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                tool.color = btn.dataset.color;
+                tool.tool = 'brush';
+            };
+        });
+        // Активируем первый цвет
+        document.querySelector('#onboarding-tools .color')?.classList.add('active');
+
+        // Кнопки инструментов
+        document.querySelectorAll('#onboarding-tools .tool').forEach(btn => {
+            btn.onclick = () => {
+                const t = btn.dataset.tool;
+                if (t === 'clear') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
+                    return;
+                }
+                document.querySelectorAll('#onboarding-tools .tool').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                tool.tool = t;
+            };
+        });
+
+        // Кнопка «Готово»
+        const doneBtn = document.getElementById('onboarding-part-done');
+        if (doneBtn) {
+            doneBtn.onclick = () => {
+                console.log('👆 Клик по «Готово» для части:', partId);
+                this.finishPart(partId, canvasEl);
+            };
+        }
+
+        console.log('✅ Canvas готов для:', partId);
+    },
+
+    // ===== Завершение части =====
+    finishPart(partId, canvasEl) {
+        // Проверяем — пустой ли холст
+        const ctx = canvasEl.getContext('2d');
+        const data = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height).data;
+        let hasContent = false;
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+            // Непрозрачный и не белый
+            if (a > 20 && !(r > 240 && g > 240 && b > 240)) {
+                hasContent = true;
+                break;
+            }
+        }
+
+        if (!hasContent) {
+            window.Toast.error('Нарисуй хоть что-нибудь!');
+            return;
+        }
+
+        const dataUrl = canvasEl.toDataURL('image/png');
+        window.Avatar.savePart(partId, dataUrl);
+        window.Audio.success();
+        window.TG.haptic('light');
+        window.Toast.success(`${window.AVATAR_PARTS[partId].title} сохранена!`);
+
+        console.log('💾 Сохранено:', partId);
+        this.currentStep++;
+        this.render();
+    },
+
+    // ===== Финальный шаг: имя =====
     renderName(body) {
+        console.log('📝 Финальный шаг: имя');
+
         body.innerHTML = `
             <div class="onboarding-step active">
                 <div class="onboarding-part-header">
@@ -179,53 +311,21 @@ window.Onboarding = {
             const preview = document.getElementById('final-preview');
             if (preview) {
                 window.Avatar.renderStack(preview, { scale: 0.4 });
-                preview.style.width = '240px';
-                preview.style.height = '240px';
-                preview.style.margin = '0 auto';
-                preview.style.position = 'relative';
-                // Масштабируем вложенные части
-                preview.querySelectorAll('.avatar-part').forEach(img => {
-                    img.style.transform = 'scale(0.4)';
-                    img.style.transformOrigin = 'top left';
-                });
             }
-            document.getElementById('onboarding-name')?.focus();
-        }, 50);
-    },
-
-    // ===== Завершение части =====
-    finishPart() {
-        const partId = window.AVATAR_ORDER[this.currentStep - 1];
-        const dataUrl = window.CanvasTool.export();
-
-        // Проверяем — а не пустой ли холст?
-        const canvas = document.getElementById('part-canvas');
-        if (this.isCanvasEmpty(canvas)) {
-            window.Toast.error('Нарисуй хоть что-нибудь!');
-            return;
-        }
-
-        window.Avatar.savePart(partId, dataUrl);
-        window.Audio.success();
-        window.TG.haptic('light');
-
-        this.currentStep++;
-        this.render();
-    },
-
-    // Проверка на пустоту
-    isCanvasEmpty(canvas) {
-        if (!canvas) return true;
-        const ctx = canvas.getContext('2d');
-        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-        // Ищем хотя бы один непрозрачный пиксель НЕ белого цвета
-        for (let i = 0; i < data.length; i += 4) {
-            const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
-            if (a > 10 && !(r > 240 && g > 240 && b > 240)) {
-                return false;
+            const nameInput = document.getElementById('onboarding-name');
+            if (nameInput) {
+                nameInput.focus();
+                nameInput.onkeydown = (e) => {
+                    if (e.key === 'Enter') this.finish();
+                };
             }
+        }, 100);
+
+        // Кнопка «Начать приключение»
+        const finishBtn = document.getElementById('onboarding-finish');
+        if (finishBtn) {
+            finishBtn.onclick = () => this.finish();
         }
-        return true;
     },
 
     // ===== Финал =====
