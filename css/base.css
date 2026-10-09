@@ -15,6 +15,37 @@
     --branch-green: #2a9d8f;
 }
 
+/* ===== ГЛОБАЛЬНЫЕ ФИКСЫ ===== */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    position: fixed;
+    inset: 0;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    color: var(--text);
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+}
+
 /* ===== БАЗА ===== */
 * {
     margin: 0;
@@ -23,20 +54,20 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-html, body { height: 100%; }
-
-body {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    background: var(--bg);
-    color: var(--text);
+/* ===== СКРОЛЛ ВНУТРИ ЭКРАНА ===== */
+.screen {
+    display: none;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    overflow-y: auto;
     overflow-x: hidden;
-    user-select: none;
-    -webkit-font-smoothing: antialiased;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-#app {
-    min-height: 100vh;
-    position: relative;
+.screen.active {
+    display: flex;
 }
 
 /* ===== КНОПКИ ===== */
@@ -100,6 +131,8 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     padding: 24px;
     max-width: 400px;
     width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .modal-content h3 { margin-bottom: 12px; font-size: 18px; }
@@ -119,7 +152,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 /* ===== TOAST ===== */
 .toast {
     position: fixed;
-    bottom: 100px;
+    bottom: calc(100px + env(safe-area-inset-bottom, 0px));
     left: 50%;
     transform: translateX(-50%) translateY(100px);
     background: var(--ink);

@@ -5,18 +5,24 @@
 window.Onboarding = {
     step: 1,
     canvasInited: false,
+    bound: false,
 
-    // Проверка: нужен ли онбординг
     needs() {
         return !window.State.player.avatar || !window.State.player.name;
     },
 
     start() {
         this.step = 1;
+
+        // Проверяем, что роутер готов
+        if (!window.Router.screens.onboarding) {
+            console.warn('⚠️ Экран onboarding не найден в роутере');
+            return;
+        }
+
         window.Router.go('onboarding');
         this.showStep(1);
 
-        // Привязываем кнопки
         if (!this.bound) {
             this.bound = true;
             this.bindEvents();
@@ -24,28 +30,32 @@ window.Onboarding = {
     },
 
     bindEvents() {
-        // Шаг 1 → 2
-        window.Buttons.onTap(document.getElementById('onboarding-next-1'), () => {
-            window.Audio.click();
-            this.showStep(2);
-            this.initCanvas();
-        });
+        const $ = (id) => document.getElementById(id);
 
-        // Шаг 2 → 3
-        window.Buttons.onTap(document.getElementById('onboarding-next-2'), () => {
-            window.Audio.click();
-            this.showStep(3);
-            // Фокус на поле имени
-            setTimeout(() => document.getElementById('onboarding-name')?.focus(), 300);
-        });
+        const next1 = $('onboarding-next-1');
+        if (next1) {
+            window.Buttons.onTap(next1, () => {
+                window.Audio.click();
+                this.showStep(2);
+                this.initCanvas();
+            });
+        }
 
-        // Финал
-        window.Buttons.onTap(document.getElementById('onboarding-finish'), () => {
-            this.finish();
-        });
+        const next2 = $('onboarding-next-2');
+        if (next2) {
+            window.Buttons.onTap(next2, () => {
+                window.Audio.click();
+                this.showStep(3);
+                setTimeout(() => $('onboarding-name')?.focus(), 300);
+            });
+        }
 
-        // Enter в поле имени
-        document.getElementById('onboarding-name')?.addEventListener('keydown', (e) => {
+        const finish = $('onboarding-finish');
+        if (finish) {
+            window.Buttons.onTap(finish, () => this.finish());
+        }
+
+        $('onboarding-name')?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') this.finish();
         });
     },
@@ -82,10 +92,8 @@ window.Onboarding = {
 
         window.Audio.success();
         window.TG.haptic('medium');
-
         window.Toast.success(`Привет, ${name}!`);
 
-        // Обновляем главный экран и идём в меню
         setTimeout(() => {
             window.Menu.refresh();
             window.Router.reset();

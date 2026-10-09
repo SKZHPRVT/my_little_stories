@@ -8,22 +8,32 @@ window.Router = {
 
     init() {
         this.screens = {
-            menu: document.getElementById('screen-menu'),
-            avatar: document.getElementById('screen-avatar'),
-            stories: document.getElementById('screen-stories'),
-            story: document.getElementById('screen-story'),
-            draw: document.getElementById('screen-draw'),
-            inventory: document.getElementById('screen-inventory'),
-            portfolio: document.getElementById('screen-portfolio'),
-            minigame: document.getElementById('screen-minigame')
+            onboarding:  document.getElementById('screen-onboarding'),
+            menu:        document.getElementById('screen-menu'),
+            character:   document.getElementById('screen-character'),
+            stories:     document.getElementById('screen-stories'),
+            story:       document.getElementById('screen-story'),
+            draw:        document.getElementById('screen-draw'),
+            inventory:   document.getElementById('screen-inventory'),
+            activities:  document.getElementById('screen-activities'),
+            progress:    document.getElementById('screen-progress'),
+            settings:    document.getElementById('screen-settings'),
+            minigame:    document.getElementById('screen-minigame')
         };
+
+        // Считаем, сколько экранов нашли
+        const found = Object.entries(this.screens).filter(([_, el]) => el).length;
+        const missing = Object.entries(this.screens).filter(([_, el]) => !el).map(([k]) => k);
+
+        console.log(`🚦 Роутер: ${found}/${Object.keys(this.screens).length} экранов найдено`);
+        if (missing.length > 0) {
+            console.warn('⚠️ Не найдены:', missing.join(', '));
+        }
 
         // Кнопки «назад»
         document.querySelectorAll('[data-back]').forEach(btn => {
             btn.addEventListener('click', () => this.back());
         });
-
-        console.log('🚦 Роутер готов. Экранов:', Object.keys(this.screens).length);
     },
 
     go(name, data = {}) {
@@ -46,7 +56,7 @@ window.Router = {
         window.State.currentScreen = name;
         window.scrollTo(0, 0);
 
-        // История для «назад»
+        // История
         if (this.history[this.history.length - 1] !== name) {
             this.history.push(name);
         }
@@ -55,7 +65,7 @@ window.Router = {
     },
 
     back() {
-        this.history.pop(); // текущий
+        this.history.pop();
         const prev = this.history.pop() || 'menu';
         this.go(prev);
     },
