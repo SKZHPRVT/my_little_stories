@@ -6,7 +6,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 24px 16px;
+    padding: 20px 14px;
     overflow-y: auto;
     min-height: 100%;
     justify-content: center;
@@ -19,7 +19,7 @@
     animation: fadeIn 0.4s ease;
 }
 
-/* ===== Приветствие ===== */
+/* Приветствие */
 .onboarding-icon {
     font-size: 80px;
     text-align: center;
@@ -40,11 +40,8 @@
     color: var(--text);
 }
 
-/* ===== Заголовок шага ===== */
-.onboarding-part-header {
-    text-align: center;
-    padding: 4px 0;
-}
+/* Заголовок */
+.onboarding-part-header { text-align: center; padding: 4px 0; }
 
 .onboarding-part-progress {
     display: inline-block;
@@ -70,7 +67,7 @@
     font-style: italic;
 }
 
-/* ===== Холст со слоями ===== */
+/* ===== ХОЛСТ СО СЛОЯМИ ===== */
 .canvas-container {
     display: flex;
     justify-content: center;
@@ -88,7 +85,7 @@
     overflow: hidden;
 }
 
-/* Canvas — НИЖНИЙ слой, белый фон */
+/* Canvas — нижний слой, прозрачный */
 .canvas-layers canvas {
     position: absolute;
     top: 0;
@@ -97,42 +94,21 @@
     height: 100%;
     z-index: 1;
     touch-action: none;
-    background: #fff;
     border-radius: 16px;
 }
 
-/* SVG-подсказки — ВЕРХНИЙ слой, прозрачный */
+/* SVG-подсказки — верхний слой */
 .canvas-guide {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 3;
+    z-index: 2;
     pointer-events: none;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
 }
 
-/* Делаем подсказки видимыми */
-.canvas-guide ellipse,
-.canvas-guide path,
-.canvas-guide line,
-.canvas-guide circle {
-    stroke: #c96d3a;
-    stroke-width: 2;
-    fill: none;
-    opacity: 0.5;
-    stroke-dasharray: 8, 6;
-}
-
-.canvas-guide ellipse[stroke*="999"],
-.canvas-guide path[stroke*="999"] {
-    stroke: #999;
-}
-
-/* ===== Финальный превью ===== */
+/* ===== ПРЕВЬЮ ===== */
 .onboarding-preview {
     display: flex;
     justify-content: center;
@@ -150,17 +126,23 @@
     position: relative;
 }
 
-.final-preview .avatar-part {
+.final-preview .avatar-part,
+.preview-stack .avatar-part,
+.hero-avatar-stack .avatar-part {
     width: 600px !important;
     height: 600px !important;
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     transform-origin: top left !important;
-    transform: scale(0.367) !important;
+    pointer-events: none;
 }
 
-/* ===== Экран персонажа ===== */
+.final-preview .avatar-part { transform: scale(0.367) !important; }
+.preview-stack .avatar-part { transform: scale(0.467) !important; }
+.hero-avatar-stack .avatar-part { transform: scale(0.333) !important; }
+
+/* ===== ЭКРАН ПЕРСОНАЖА ===== */
 .character-body {
     flex: 1;
     display: flex;
@@ -176,14 +158,8 @@
     align-items: center;
 }
 
-.character-name-row label {
-    font-size: 14px;
-    color: var(--hint);
-}
-
-.character-name-row input {
-    flex: 1;
-}
+.character-name-row label { font-size: 14px; color: var(--hint); }
+.character-name-row input { flex: 1; }
 
 .mini-btn {
     padding: 10px 14px;
@@ -208,16 +184,6 @@
     position: relative;
     width: 280px;
     height: 280px;
-}
-
-.preview-stack .avatar-part {
-    width: 600px !important;
-    height: 600px !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    transform-origin: top left !important;
-    transform: scale(0.467) !important;
 }
 
 .character-hint {
@@ -247,31 +213,16 @@
     border: 2px solid transparent;
 }
 
-.part-card.has {
-    border-color: var(--accent);
-}
+.part-card.has { border-color: var(--accent); }
+.part-card-title { font-weight: 600; }
 
-.part-card-title {
-    font-weight: 600;
-}
-
-/* ===== Главный экран: аватар-стопка ===== */
+/* ===== Главный экран ===== */
 .hero-avatar-stack {
     width: 100%;
     height: 100%;
     position: relative;
     overflow: hidden;
     border-radius: 50%;
-}
-
-.hero-avatar-stack .avatar-part {
-    width: 600px !important;
-    height: 600px !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    transform-origin: top left !important;
-    transform: scale(0.333) !important;
 }
 
 /* ===== Анимации ===== */

@@ -1,5 +1,5 @@
 /* ============================================
-   ХОЛСТ ДЛЯ РИСОВАНИЯ
+   ХОЛСТ ДЛЯ РИСОВАНИЯ + ЗАЛИВКА
    ============================================ */
 
 window.CanvasTool = {
@@ -20,9 +20,8 @@ window.CanvasTool = {
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
 
-        // Заполняем белым фоном
-        this.ctx.fillStyle = '#fff';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Прозрачный фон (SVG-guide видно сверху)
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.bindEvents(sizeSliderId);
         console.log('🎨 Холст готов:', canvasId);
@@ -30,43 +29,63 @@ window.CanvasTool = {
 
     bindEvents(sizeSliderId) {
         const canvas = this.canvas;
+        const self = this;
+
+        const getPos = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        };
+
+        const start = (e) => {
+            e.preventDefault();
+            const p = getPos(e);
+            
+            if (self.currentTool === 'fill') {
+                self.floodFill(Math.floor(p.x), Math.floor(p.y), self.currentColor);
+                return;
+            }
+            
+            self.isDrawing = true;
+            self.lastX = p.x;
+            self.lastY = p.y;
+        };
+
+        const move = (e) => {
+            if (!self.isDrawing) return;
+            e.preventDefault();
+            const p = getPos(e);
+            self.ctx.beginPath();
+            self.ctx.moveTo(self.lastX, self.lastY);
+            self.ctx.lineTo(p.x, p.y);
+            self.ctx.strokeStyle = self.currentTool === 'eraser' ? '#ffffff' : self.currentColor;
+            self.ctx.lineWidth = self.currentTool === 'eraser' ? self.currentSize * 3 : self.currentSize;
+            self.ctx.stroke();
+            self.lastX = p.x;
+            self.lastY = p.y;
+        };
+
+        const stop = (e) => {
+            if (e) e.preventDefault();
+            self.isDrawing = false;
+        };
 
         // Mouse
-        canvas.addEventListener('mousedown', (e) => this.start(e.offsetX, e.offsetY));
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-            this.move(x, y);
-        });
-        canvas.addEventListener('mouseup', () => this.stop());
-        canvas.addEventListener('mouseout', () => this.stop());
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', move);
+        canvas.addEventListener('mouseup', stop);
+        canvas.addEventListener('mouseleave', stop);
 
         // Touch
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const t = e.touches[0];
-            const x = (t.clientX - rect.left) * (canvas.width / rect.width);
-            const y = (t.clientY - rect.top) * (canvas.height / rect.height);
-            this.start(x, y);
-        }, { passive: false });
+        canvas.addEventListener('touchstart', start, { passive: false });
+        canvas.addEventListener('touchmove', move, { passive: false });
+        canvas.addEventListener('touchend', stop, { passive: false });
 
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const t = e.touches[0];
-            const x = (t.clientX - rect.left) * (canvas.width / rect.width);
-            const y = (t.clientY - rect.top) * (canvas.height / rect.height);
-            this.move(x, y);
-        }, { passive: false });
-
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            this.stop();
-        }, { passive: false });
-
-        // Slider толщины
+        // Slider
         const slider = document.getElementById(sizeSliderId);
         if (slider) {
             slider.addEventListener('input', (e) => {
@@ -75,31 +94,83 @@ window.CanvasTool = {
         }
     },
 
-    start(x, y) {
-        this.isDrawing = true;
-        this.lastX = x;
-        this.lastY = y;
+    // Заливка (flood fill)
+    floodFill(x, y, fillColorHex) {
+        const ctx = this.ctx;
+        const canvas = this.canvas;
+        const W = canvas.width;
+        const H = canvas.height;
+
+        if (x < 0 || x >= W || y < 0 || y >= H) return;
+
+        const imageData = ctx.getImageData(0, 0, W, H);
+        const data = imageData.data;
+
+        const idx = (y * W + x) * 4;
+        const targetR = data[idx], targetG = data[idx+1], targetB = data[idx+2], targetA = data[idx+3];
+
+        // Цвет заливки
+        const fill = this.hexToRgb(fillColorHex);
+
+        // Если пиксель уже такого цвета — выходим
+        if (Math.abs(targetR - fill.r) < 10 && Math.abs(targetG - fill.g) < 10 &&
+            Math.abs(targetB - fill.b) < 10 && targetA > 200) {
+            return;
+        }
+
+        // Ограничение — не заливаем дальше "жёстких" границ (чёрных линий)
+        const tolerance = 80;
+
+        const matches = (i) => {
+            const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+            return Math.abs(r - targetR) <= tolerance &&
+                   Math.abs(g - targetG) <= tolerance &&
+                   Math.abs(b - targetB) <= tolerance &&
+                   Math.abs(a - targetA) <= tolerance;
+        };
+
+        const stack = [[x, y]];
+        const visited = new Uint8Array(W * H);
+
+        while (stack.length > 0) {
+            const [cx, cy] = stack.pop();
+            if (cx < 0 || cx >= W || cy < 0 || cy >= H) continue;
+
+            const pos = cy * W + cx;
+            if (visited[pos]) continue;
+            visited[pos] = 1;
+
+            const i = pos * 4;
+            if (!matches(i)) continue;
+
+            // Красим
+            data[i] = fill.r;
+            data[i+1] = fill.g;
+            data[i+2] = fill.b;
+            data[i+3] = 255;
+
+            stack.push([cx + 1, cy]);
+            stack.push([cx - 1, cy]);
+            stack.push([cx, cy + 1]);
+            stack.push([cx, cy - 1]);
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        window.Audio.beep(500, 0.08);
     },
 
-    move(x, y) {
-        if (!this.isDrawing) return;
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.lastX, this.lastY);
-        this.ctx.lineTo(x, y);
-        this.ctx.strokeStyle = this.currentTool === 'eraser' ? '#ffffff' : this.currentColor;
-        this.ctx.lineWidth = this.currentTool === 'eraser' ? this.currentSize * 3 : this.currentSize;
-        this.ctx.stroke();
-        this.lastX = x;
-        this.lastY = y;
-    },
-
-    stop() {
-        this.isDrawing = false;
+    hexToRgb(hex) {
+        hex = hex.replace('#', '');
+        return {
+            r: parseInt(hex.substring(0, 2), 16),
+            g: parseInt(hex.substring(2, 4), 16),
+            b: parseInt(hex.substring(4, 6), 16)
+        };
     },
 
     setColor(color) {
         this.currentColor = color;
-        this.currentTool = 'brush';
+        if (this.currentTool === 'eraser') this.currentTool = 'brush';
     },
 
     setTool(tool) {
@@ -111,36 +182,35 @@ window.CanvasTool = {
     },
 
     clear() {
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
 
     export() {
         return this.canvas.toDataURL('image/png');
     },
 
-    // Привязка кнопок палитры и инструментов
     bindToolsPanel(panelSelector) {
         const panel = document.querySelector(panelSelector);
         if (!panel) return;
 
         panel.querySelectorAll('.color').forEach(btn => {
-            window.Buttons.onTap(btn, () => {
+            btn.onclick = () => {
                 panel.querySelectorAll('.color').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.setColor(btn.dataset.color);
-            });
+            };
         });
 
         panel.querySelectorAll('.tool').forEach(btn => {
-            window.Buttons.onTap(btn, () => {
+            btn.onclick = () => {
                 panel.querySelectorAll('.tool').forEach(b => b.classList.remove('active'));
                 if (btn.dataset.tool !== 'clear') btn.classList.add('active');
                 this.setTool(btn.dataset.tool);
-            });
+            };
         });
 
-        // Активируем первый цвет
         panel.querySelector('.color')?.classList.add('active');
     }
 };
+
+console.log('🎨 canvas.js загружен');
